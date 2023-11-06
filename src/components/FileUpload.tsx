@@ -1,15 +1,35 @@
-"use client";
+'use client'
 import { useDropzone } from "react-dropzone";
 import { Inbox } from "lucide-react";
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+});
 
 const FileUpload = () => {
   const { getRootProps, getInputProps } = useDropzone({
-    accept: {'application/pdf': [".pdf"]},
+    accept: {'application/pdf':['.pdf']},
     maxFiles: 1,
-    onDrop: (acceptedFiles)  => {
-        
+    onDrop: async (acceptedFiles)  => {
+      const file = acceptedFiles[0];
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const result = await fetch(`https://api.cloudinary.com/v1_1/${process.env.CLOUD_NAME}/auto/upload`, {
+          method: 'POST',
+          body: formData,
+        }).then(response => response.json());
+
+        console.log(result);
+      } catch (error) {
+        console.error('Error uploading file to Cloudinary:', error);
+      }
     }
   });
+
   return (
     <div className="p-2 bg-white rounded-xl">
       <div
